@@ -8,7 +8,8 @@ app.secret_key = 'vinay_secret_key'
 def populate_swimmers():
     if 'swimmers' not in session:
         files = os.listdir(swimclub.FOLDER)
-        files.remove('.DS_Store')
+        if '.DS_Store' in files:
+            files.remove('.DS_Store')
         session['swimmers'] = {}
         for f in files:
             swimmer, *_, = swimclub.read_swim_data(f)
@@ -33,6 +34,13 @@ def display_swimmer_files():
     swimmer = request.form['swimmer_name']
     # return str(session['swimmers'][swimmer])
     return render_template('select.html', title='Select Swimmer\'s Event', url='/showchart', select_id='swimmer_file_name', data=session['swimmers'][swimmer])
+
+@app.post('/showchart')
+def display_swimmer_bar_chart():
+    populate_swimmers()
+    filename = request.form['swimmer_file_name']
+    chartHtmlPath = swimclub.produce_bar_chart(filename, location='templates/')
+    return render_template(chartHtmlPath.removeprefix('templates/'))
     
 if __name__ == '__main__':
     app.run(debug=True)
